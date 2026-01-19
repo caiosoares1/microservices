@@ -14,7 +14,7 @@ require (
 	golang.org/x/net v0.46.1-0.20251013234738-63d1a5100f82 // indirect
 	golang.org/x/sys v0.37.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251022142026-3a174f9686a8 // indirect
-	google.golang.org/protobuf v1.36.10 // indirect
+	google.golang.org/protobuf v1.36.11 // indirect
 )
 
 require (
@@ -25,4 +25,6 @@ require (
 	gorm.io/driver/mysql v1.6.0
 )
 
-replace github.com/caiosoares1/microservices-proto/golang/payment => ../../../microservices-proto/golang/payment
+replace github.com/caiosoares1/microservices-proto/golang/payment => ../../microservices-proto/golang/payment
+
+replace github.com/caiosoares1/microservices-proto/golang/order => ../../microservices-proto/golang/order

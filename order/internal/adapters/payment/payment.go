@@ -2,7 +2,6 @@ package payment_adapter
 
 import (
 	"context"
-	"log"
 
 	"github.com/caiosoares1/microservices-proto/golang/payment"
 	"github.com/caiosoares1/microservices/order/internal/application/core/domain"
@@ -25,7 +24,7 @@ func NewAdapter(paymentServiceUrl string) (*Adapter, error) {
 	return &Adapter{payment: client}, nil
 }
 
-func (a *Adapter) Charge(order domain.Order) error {
+func (a *Adapter) Charge(order *domain.Order) error {
 	_, err := a.payment.Create(context.Background(), &payment.CreatePaymentRequest{
 		UserId:     order.CustomerID,
 		OrderId:    order.ID,
