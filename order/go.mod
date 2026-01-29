@@ -1,17 +1,18 @@
 module github.com/caiosoares1/microservices/order
 
-go 1.25.3
+go 1.24.0
 
 require (
 	github.com/caiosoares1/microservices-proto/golang/order v0.0.1
 	github.com/caiosoares1/microservices-proto/golang/payment v0.0.0-00010101000000-000000000000
+	github.com/caiosoares1/microservices-proto/golang/shipping v0.0.0-00010101000000-000000000000
+	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	gorm.io/gorm v1.31.1
 )
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/go-sql-driver/mysql v1.8.1 // indirect
-	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
 	golang.org/x/net v0.46.1-0.20251013234738-63d1a5100f82 // indirect
 	golang.org/x/sys v0.37.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251022142026-3a174f9686a8 // indirect
@@ -29,3 +30,5 @@ require (
 replace github.com/caiosoares1/microservices-proto/golang/payment => ../../microservices-proto/golang/payment
 
 replace github.com/caiosoares1/microservices-proto/golang/order => ../../microservices-proto/golang/order
+
+replace github.com/caiosoares1/microservices-proto/golang/shipping => ../../microservices-proto/golang/shipping

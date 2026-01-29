@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shipping
+  labels:
+    app: shipping
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shipping
+  template:
+    metadata:
+      labels:
+        app: shipping
+    spec:
+      containers:
+        - name: shipping
+          image: shipping:latest
+          ports:
+            - containerPort: 50053
+          env:
+            - name: ENV
+              value: "development"
+            - name: APPLICATION_PORT
+              value: "50053"
+            - name: DATA_SOURCE_URL
+              value: "root:password@tcp(mysql:3306)/shipping?charset=utf8mb4&parseTime=True&loc=Local"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shipping
+spec:
+  selector:
+    app: shipping
+  ports:
+    - protocol: TCP
+      port: 50053
+      targetPort: 50053
+  type: ClusterIP

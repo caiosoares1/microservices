@@ -23,6 +23,14 @@ type OrderItem struct {
 	OrderID     uint
 }
 
+type StockItem struct {
+	gorm.Model
+	ProductCode string `gorm:"type:varchar(100);uniqueIndex"`
+	Name        string
+	UnitPrice   float32
+	Quantity    int32
+}
+
 type Adapter struct {
 	db *gorm.DB
 }
@@ -32,7 +40,7 @@ func NewAdapter(dataSourceUrl string) (*Adapter, error) {
 	if openErr != nil {
 		return nil, fmt.Errorf("db connection error: %v", openErr)
 	}
-	err := db.AutoMigrate(&Order{}, OrderItem{})
+	err := db.AutoMigrate(&Order{}, &OrderItem{}, &StockItem{})
 	if err != nil {
 		return nil, fmt.Errorf("db migration error: %v", err)
 	}
@@ -83,4 +91,36 @@ func (a Adapter) Save(order *domain.Order) error {
 
 func (a Adapter) UpdateStatus(order *domain.Order) error {
 	return a.db.Model(&Order{}).Where("id = ?", order.ID).Update("status", order.Status).Error
+}
+
+func (a Adapter) GetStockItem(productCode string) (domain.StockItem, error) {
+	var stockEntity StockItem
+	res := a.db.Where("product_code = ?", productCode).First(&stockEntity)
+	if res.Error != nil {
+		return domain.StockItem{}, res.Error
+	}
+	return domain.StockItem{
+		ProductCode: stockEntity.ProductCode,
+		Name:        stockEntity.Name,
+		UnitPrice:   stockEntity.UnitPrice,
+		Quantity:    stockEntity.Quantity,
+	}, nil
+}
+
+func (a Adapter) GetStockItems(productCodes []string) ([]domain.StockItem, error) {
+	var stockEntities []StockItem
+	res := a.db.Where("product_code IN ?", productCodes).Find(&stockEntities)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	var items []domain.StockItem
+	for _, entity := range stockEntities {
+		items = append(items, domain.StockItem{
+			ProductCode: entity.ProductCode,
+			Name:        entity.Name,
+			UnitPrice:   entity.UnitPrice,
+			Quantity:    entity.Quantity,
+		})
+	}
+	return items, nil
 }

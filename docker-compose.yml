@@ -1,0 +1,87 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - microservices-network
+
+  order:
+    build:
+      context: ../
+      dockerfile: microservices/order/Dockerfile
+    container_name: order-service
+    ports:
+      - "50051:50051"
+    environment:
+      ENV: development
+      APPLICATION_PORT: "50051"
+      DATA_SOURCE_URL: "root:root@tcp(mysql:3306)/order?charset=utf8mb4&parseTime=True&loc=Local"
+      PAYMENT_SERVICE_URL: "payment:50052"
+      SHIPPING_SERVICE_URL: "shipping:50053"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      payment:
+        condition: service_started
+      shipping:
+        condition: service_started
+    networks:
+      - microservices-network
+    restart: on-failure
+
+  payment:
+    build:
+      context: ../
+      dockerfile: microservices/payment/Dockerfile
+    container_name: payment-service
+    ports:
+      - "50052:50052"
+    environment:
+      ENV: development
+      APPLICATION_PORT: "50052"
+      DATA_SOURCE_URL: "root:root@tcp(mysql:3306)/payment?charset=utf8mb4&parseTime=True&loc=Local"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - microservices-network
+    restart: on-failure
+
+  shipping:
+    build:
+      context: ../
+      dockerfile: microservices/shipping/Dockerfile
+    container_name: shipping-service
+    ports:
+      - "50053:50053"
+    environment:
+      ENV: development
+      APPLICATION_PORT: "50053"
+      DATA_SOURCE_URL: "root:root@tcp(mysql:3306)/shipping?charset=utf8mb4&parseTime=True&loc=Local"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - microservices-network
+    restart: on-failure
+
+volumes:
+  mysql_data:
+
+networks:
+  microservices-network:
+    driver: bridge
