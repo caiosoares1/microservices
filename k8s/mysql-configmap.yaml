@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-initdb
+  namespace: grpc-microservices
+data:
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS orders;
+    CREATE DATABASE IF NOT EXISTS payments;
+    CREATE DATABASE IF NOT EXISTS shipping;
+
+    GRANT ALL PRIVILEGES ON orders.* TO 'user'@'%';
+    GRANT ALL PRIVILEGES ON payments.* TO 'user'@'%';
+    GRANT ALL PRIVILEGES ON shipping.* TO 'user'@'%';
+    FLUSH PRIVILEGES;
+
+    USE orders;
+
+    CREATE TABLE IF NOT EXISTS stock_items (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        product_code VARCHAR(100) NOT NULL UNIQUE,
+        product_name VARCHAR(255) NOT NULL,
+        quantity INT NOT NULL DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
+
+    INSERT INTO stock_items (product_code, product_name, quantity) VALUES
+    ('PROD001', 'Laptop Dell Inspiron', 50),
+    ('PROD002', 'Mouse Logitech MX', 200),
+    ('PROD003', 'Teclado Mecânico RGB', 150),
+    ('PROD004', 'Monitor LG 27"', 30),
+    ('PROD005', 'Headset Gamer', 100),
+    ('PROD006', 'Webcam HD 1080p', 80),
+    ('PROD007', 'SSD 1TB NVMe', 120),
+    ('PROD008', 'Memória RAM 16GB', 200),
+    ('PROD009', 'Placa de Vídeo RTX', 25),
+    ('PROD010', 'Fonte 750W Modular', 60);

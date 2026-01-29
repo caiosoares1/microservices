@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: grpc-microservices
+  labels:
+    app: payment-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      containers:
+        - name: payment
+          image: payment-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 50052
+              name: grpc
+          env:
+            - name: APPLICATION_PORT
+              value: "50052"
+            - name: ENV
+              value: "production"
+            - name: DATA_SOURCE_URL
+              value: "user:password@tcp(mysql:3306)/payments?charset=utf8mb4&parseTime=True&loc=Local"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+          livenessProbe:
+            tcpSocket:
+              port: 50052
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 50052
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      initContainers:
+        - name: wait-for-mysql
+          image: busybox:1.35
+          command: ['sh', '-c', 'until nc -z mysql 3306; do echo waiting for mysql; sleep 2; done;']
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+  namespace: grpc-microservices
+spec:
+  selector:
+    app: payment-service
+  ports:
+    - port: 50052
+      targetPort: 50052
+      name: grpc
+  type: ClusterIP

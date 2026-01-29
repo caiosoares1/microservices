@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: grpc-microservices
+  labels:
+    app: order-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+        - name: order
+          image: order-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 50051
+              name: grpc
+          env:
+            - name: APPLICATION_PORT
+              value: "50051"
+            - name: ENV
+              value: "production"
+            - name: DATA_SOURCE_URL
+              value: "user:password@tcp(mysql:3306)/orders?charset=utf8mb4&parseTime=True&loc=Local"
+            - name: PAYMENT_SERVICE_URL
+              value: "payment-service:50052"
+            - name: SHIPPING_SERVICE_URL
+              value: "shipping-service:50053"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+          livenessProbe:
+            tcpSocket:
+              port: 50051
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 50051
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      initContainers:
+        - name: wait-for-mysql
+          image: busybox:1.35
+          command: ['sh', '-c', 'until nc -z mysql 3306; do echo waiting for mysql; sleep 2; done;']
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  namespace: grpc-microservices
+spec:
+  selector:
+    app: order-service
+  ports:
+    - port: 50051
+      targetPort: 50051
+      name: grpc
+  type: ClusterIP
