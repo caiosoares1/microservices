@@ -1,0 +1,7 @@
+{
+  "costumer_id": 1,
+  "order_items": [
+    {"product_code": "PROD002", "unit_price": 50.00, "quantity": 2},
+    {"product_code": "PROD003", "unit_price": 75.00, "quantity": 1}
+  ]
+}
